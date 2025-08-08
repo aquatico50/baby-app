@@ -522,6 +522,9 @@ export default function TaskTracker() {
                   {coupons.slice().reverse().map(c => (
                     <li key={c.id} className={tierClass(c.tier) + " coupon--held"}>
                       <span className="cut" aria-hidden="true"></span>
+                      <span className="fx-stars" aria-hidden="true"></span>
+                      <span className="fx-sheen" aria-hidden="true"></span>
+
                       <div>
                         <div className="title-row">
                           <span className="emoji" aria-hidden="true">{c.icon || "🎟️"}</span>
@@ -549,6 +552,9 @@ export default function TaskTracker() {
                     {list.map(r => (
                       <div key={r.key} className={tierClass(r.tier)}>
                         <span className="cut" aria-hidden="true"></span>
+                        <span className="fx-stars" aria-hidden="true"></span>
+                        <span className="fx-sheen" aria-hidden="true"></span>
+                
                         <div>
                           <div className="title-row">
                             <span className="emoji" aria-hidden="true">{r.icon || "🎟️"}</span>
