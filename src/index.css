@@ -323,4 +323,28 @@ body{
 @media (prefers-reduced-motion: reduce){
   .coupon .fx-stars, .coupon .fx-sheen { animation: none; }
 }
+/* ========== COUPON FOOTER ========== */
+.coupon-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 12px;
+}
+
+/* Make sure all direct children are layered BELOW sparkles */
+.coupon > * {
+  position: relative;
+  z-index: 1;
+}
+
+/* Sparkle layers ABOVE everything */
+.coupon .fx-stars,
+.coupon .fx-sheen {
+  z-index: 5;
+}
+
+/* Cut line always stays on top */
+.coupon .cut {
+  z-index: 6;
+}
 
