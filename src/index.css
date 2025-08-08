@@ -36,3 +36,41 @@
 }
 .year-cell{ padding:10px; border-radius:12px; background:rgba(255,255,255,.08); border:1px solid rgba(255,255,255,.14) }
 .year-head{ display:flex; align-items:center; justify-content:space-between; margin-bottom:8px }
+/* ===== Layout with left sidebar ===== */
+.layout{ display:grid; grid-template-columns: 180px 1fr; gap:16px }
+@media (max-width: 800px){ .layout{ grid-template-columns: 1fr } .sidebar{ position:sticky; top:8px } }
+
+.sidebar{
+  background: linear-gradient(180deg, rgba(255,255,255,.14), rgba(255,255,255,.06));
+  backdrop-filter: blur(10px) saturate(140%);
+  border:1px solid var(--white-24);
+  border-radius:16px;
+  padding:12px;
+  box-shadow: 0 8px 24px rgba(0,0,0,.25);
+}
+.sidebar-title{ font-weight:800; margin-bottom:8px }
+.sidebar-tabs{ display:grid; gap:6px }
+.sidebar-tab{
+  border:none; border-radius:12px; padding:10px 12px; text-align:left;
+  color:#fff; background:rgba(255,255,255,.12); box-shadow: inset 0 0 0 1px var(--white-24);
+}
+.sidebar-tab--active{
+  background:linear-gradient(90deg,#7c3aed,#a78bfa);
+  box-shadow:0 8px 20px rgba(124,58,237,.45);
+}
+.sidebar-points{ margin-top:12px; }
+
+/* ===== Day grid with borders & sticky times ===== */
+.day-grid.bordered{ border-top:1px solid rgba(255,255,255,.18) }
+.day-grid.bordered .day-hour{
+  border-bottom:1px solid rgba(255,255,255,.18);
+  padding-bottom:8px; margin-bottom:8px;
+}
+.sticky-time{ position:sticky; left:0 }
+
+/* ===== Action bubble on long-press ===== */
+.action-bubble{
+  position:absolute; right:8px; top:-8px;
+  background:rgba(0,0,0,.7); border:1px solid rgba(255,255,255,.2);
+  color:#fff; border-radius:12px; padding:6px; display:flex; gap:6px; z-index:5;
+}
