@@ -2,13 +2,13 @@ import React, { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 
 const BTS_MEMBERS = [
-  { name: "RM", emoji: "🐨", message: "잘했어!" },
-  { name: "Jin", emoji: "🐹", message: "멋져요!" },
-  { name: "Suga", emoji: "🐱", message: "화이팅!" },
-  { name: "J-Hope", emoji: "🐿️", message: "대박이야!" },
-  { name: "Jimin", emoji: "🐥", message: "좋았어!" },
-  { name: "V", emoji: "🐯", message: "사랑해요!" },
-  { name: "Jungkook", emoji: "🐰", message: "최고야!" },
+  { name: "RM", emoji: "\uD83D\uDC28", message: "잘했어!" },
+  { name: "Jin", emoji: "\uD83D\uDC39", message: "멋져요!" },
+  { name: "Suga", emoji: "\uD83D\uDC31", message: "화이팅!" },
+  { name: "J-Hope", emoji: "\uD83E\uDDC3", message: "대박이야!" },
+  { name: "Jimin", emoji: "\uD83D\uDC25", message: "좋았어!" },
+  { name: "V", emoji: "\uD83D\uDC2F", message: "사랑해요!" },
+  { name: "Jungkook", emoji: "\uD83D\uDC30", message: "최고야!" },
 ];
 
 const TaskTracker = () => {
@@ -52,7 +52,9 @@ const TaskTracker = () => {
         {tasks.map((task) => (
           <li
             key={task.id}
-            className={\`p-3 rounded shadow flex justify-between items-center \${task.done ? "bg-green-100 line-through" : "bg-white"}\`}
+            className={`p-3 rounded shadow flex justify-between items-center ${
+              task.done ? "bg-green-100 line-through" : "bg-white"
+            }`}
           >
             {task.text}
             {!task.done && (
