@@ -270,3 +270,34 @@ body{margin:0;font-family:Inter,system-ui,Segoe UI,Roboto,Arial,sans-serif;color
   background: linear-gradient(90deg,#cfd2d3,#e5e4e2);
   box-shadow: 0 8px 18px rgba(229,228,226,.40);
 }
+
+/* ===== Sparkle Effect for Coupons & Rewards ===== */
+@keyframes sparkle {
+  0% { background-position: 0% 0%; }
+  50% { background-position: 100% 100%; }
+  100% { background-position: 0% 0%; }
+}
+
+.coupon { position: relative; overflow: hidden; }
+
+/* moving diagonal highlight that doesn’t block clicks */
+.coupon::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background-image: linear-gradient(
+    125deg,
+    rgba(255,255,255,0) 40%,
+    rgba(255,255,255,0.40) 50%,
+    rgba(255,255,255,0) 60%
+  );
+  background-size: 300% 300%;
+  animation: sparkle 3s infinite;
+  pointer-events: none;
+  mix-blend-mode: screen;
+}
+
+/* Respect users who prefer reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  .coupon::after { animation: none; }
+}
