@@ -550,30 +550,35 @@ export default function TaskTracker() {
                   <div key={tier} className="card" style={{ display:"grid", gap:10 }}>
                     <div style={{fontWeight:900}}>{tier} Rewards</div>
                     {list.map(r => (
-                      <div key={r.key} className={tierClass(r.tier)}>
-                        <span className="cut" aria-hidden="true"></span>
-                        <span className="fx-stars" aria-hidden="true"></span>
-                        <span className="fx-sheen" aria-hidden="true"></span>
-                
-                        <div>
-                          <div className="title-row">
-                            <span className="emoji" aria-hidden="true">{r.icon || "🎟️"}</span>
-                            <span className="title">{r.label}</span>
-                          </div>
-                          <div className="tier">{r.tier} · Earned with points</div>
-                        </div>
-                        <div style={{display:"grid", gap:8, justifyItems:"end"}}>
-                          <div className="badge">{r.cost} pts</div>
-                          <button
-                            className="btn"
-                            disabled={points < r.cost}
-                            onClick={()=>redeem(r)}
-                            style={{opacity: points < r.cost ? .5 : 1}}
-                            aria-label={`Redeem ${r.label}`}
-                          >
-                            Redeem
-                          </button>
-                        </div>
+                      <div key={r.key} className={`coupon coupon--${r.tier.toLowerCase()}`}>
+  <span className="cut" aria-hidden="true"></span>
+
+  <div className="title-row">
+    {r.icon && <span className="emoji">{r.icon}</span>}
+    <div>
+      <div className="title">{r.label}</div>
+      <div className="tier">{r.tier} · Earned with points</div>
+    </div>
+  </div>
+
+  <div className="coupon-footer">
+    <span className="badge">{r.cost} pts</span>
+    <button
+      className="btn redeem"
+      disabled={points < r.cost}
+      onClick={() => redeem(r)}
+      style={{ opacity: points < r.cost ? 0.5 : 1 }}
+      aria-label={`Redeem ${r.label}`}
+    >
+      Redeem
+    </button>
+  </div>
+
+  {/* Sparkle overlays */}
+  <div className="fx-stars"></div>
+  <div className="fx-sheen"></div>
+</div>
+
                       </div>
                     ))}
                   </div>
