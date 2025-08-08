@@ -319,6 +319,43 @@ export default function TaskTracker() {
       {/* -------- SCHEDULE (DEFAULT) -------- */}
       {tab === "schedule" && (
         <section className="card" style={{ display: "grid", gap: 12 }}>
+{/* Date bar with arrows */}
+<div className="card" style={{display:"flex", gap:8, alignItems:"center", justifyContent:"space-between", flexWrap:"wrap"}}>
+  <div style={{display:"flex", gap:8, alignItems:"center"}}>
+    <button
+      className="menu-item"
+      onClick={()=>{
+        const d = new Date(dayDate);
+        d.setDate(d.getDate() - 1);
+        setDayDate(d.toISOString().slice(0,10));
+      }}
+      aria-label="Previous day"
+    >◀</button>
+
+    <input
+      type="date"
+      className="input"
+      value={dayDate}
+      onChange={(e)=>setDayDate(e.target.value)}
+      style={{width:150}}
+    />
+
+    <button
+      className="menu-item"
+      onClick={()=>{
+        const d = new Date(dayDate);
+        d.setDate(d.getDate() + 1);
+        setDayDate(d.toISOString().slice(0,10));
+      }}
+      aria-label="Next day"
+    >▶</button>
+  </div>
+
+  {/* quick 'Today' button if you want */}
+  <button className="menu-item" onClick={()=>setDayDate(new Date().toISOString().slice(0,10))}>
+    Today
+  </button>
+</div>
           {/* Collapsed Add Item */}
           <div>
             {!showAdd ? (
