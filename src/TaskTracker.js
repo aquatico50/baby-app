@@ -33,32 +33,51 @@ const COLORS = ["#f87171","#fbbf24","#34d399","#60a5fa","#a78bfa","#f472b6","#f5
 const makeConfetti = (count=18) =>
   new Array(count).fill(0).map((_,i)=>({
     id: `${Date.now()}-${i}`,
-    x: (Math.random()*2-1)*140,    // spread
-    y: -Math.random()*40,          // slight up offset
-    r: 6 + Math.random()*8,        // size
+    x: (Math.random()*2-1)*140,
+    y: -Math.random()*40,
+    r: 6 + Math.random()*8,
     rot: (Math.random()*2-1)*180,
     color: COLORS[Math.floor(Math.random()*COLORS.length)],
     dur: 0.9 + Math.random()*0.5,
     drift: (Math.random()*2-1)*80
   }));
 
-// ------- APP -------
 export default function TaskTracker() {
-  const [tab, setTab] = useState("tasks");
+  const [tab, setTab] = useState("tasks"); // "tasks" | "rewards" | "history" | "checklists"
+
+  // tasks + rewards state
   const [tasks, setTasks] = useState(() => load("tasks", []));
   const [points, setPoints] = useState(() => load("points", 0));
   const [redemptions, setRedemptions] = useState(() => load("redemptions", []));
   const [input, setInput] = useState("");
   const [cat, setCat] = useState("feeding");
 
+  // celebration
   const [toast, setToast] = useState(null);
-  const [celebrate, setCelebrate] = useState(null); // { id, points, when }
-  const [confetti, setConfetti] = useState([]);     // array of particles
+  const [celebrate, setCelebrate] = useState(null);
+  const [confetti, setConfetti] = useState([]);
 
+  // checklists state
+  const defaultLists = [
+    { id: uid(), name: "Hospital Bag", items: [] },
+    { id: uid(), name: "Diaper Bag", items: [] },
+  ];
+  const [lists, setLists] = useState(() => load("checklists", defaultLists));
+  const [activeListId, setActiveListId] = useState(() => {
+    const saved = load("activeListId", null);
+    return saved || (lists[0]?.id ?? null);
+  });
+  const [newListName, setNewListName] = useState("");
+  const [newItemText, setNewItemText] = useState("");
+
+  // persist
   useEffect(() => save("tasks", tasks), [tasks]);
   useEffect(() => save("points", points), [points]);
   useEffect(() => save("redemptions", redemptions), [redemptions]);
+  useEffect(() => save("checklists", lists), [lists]);
+  useEffect(() => save("activeListId", activeListId), [activeListId]);
 
+  // ------- Tasks tab logic -------
   const addTask = (title, category) => {
     const c = category || cat;
     if (!title?.trim()) return;
@@ -79,16 +98,10 @@ export default function TaskTracker() {
       const updated = { ...t, done: true, completedAt: new Date().toISOString() };
 
       setPoints(p => p + earned);
-
-      // floating +points over the task
       setCelebrate({ id: t.id, points: earned, when: Date.now() });
       setTimeout(() => setCelebrate(null), 1200);
-
-      // global confetti burst
       setConfetti(makeConfetti());
       setTimeout(() => setConfetti([]), 1200);
-
-      // small toast
       setToast({ msg: `+${earned} pts for ${cfg.label}!`, when: Date.now() });
       setTimeout(() => setToast(null), 1500);
 
@@ -100,10 +113,8 @@ export default function TaskTracker() {
     if (points < r.cost) return;
     setPoints(p => p - r.cost);
     setRedemptions(prev => [...prev, { id: uid(), reward: r.key, label: r.label, cost: r.cost, date: new Date().toISOString() }]);
-    // confetti for redeem, too
     setConfetti(makeConfetti(24));
     setTimeout(() => setConfetti([]), 1400);
-
     setToast({ msg: `Redeemed: ${r.label} (−${r.cost} pts)`, when: Date.now() });
     setTimeout(() => setToast(null), 1800);
   };
@@ -123,21 +134,71 @@ export default function TaskTracker() {
     return tasks.filter(x => (x.createdAt || "").slice(0,10) === t);
   }, [tasks]);
 
+  // ------- Checklists logic -------
+  const activeList = lists.find(l => l.id === activeListId) || null;
+  const unchecked = activeList ? activeList.items.filter(i => !i.done) : [];
+  const checked   = activeList ? activeList.items.filter(i =>  i.done) : [];
+
+  const addList = () => {
+    const name = newListName.trim();
+    if (!name) return;
+    const newL = { id: uid(), name, items: [] };
+    const next = [...lists, newL];
+    setLists(next);
+    setActiveListId(newL.id);
+    setNewListName("");
+  };
+
+  const deleteList = (id) => {
+    const next = lists.filter(l => l.id !== id);
+    setLists(next);
+    if (activeListId === id) setActiveListId(next[0]?.id ?? null);
+  };
+
+  const addItem = () => {
+    const text = newItemText.trim();
+    if (!text || !activeList) return;
+    const item = { id: uid(), text, done: false, createdAt: Date.now() };
+    setLists(prev => prev.map(l => l.id === activeList.id ? { ...l, items: [...l.items, item] } : l));
+    setNewItemText("");
+  };
+
+  const toggleItem = (itemId) => {
+    if (!activeList) return;
+    setLists(prev => prev.map(l => {
+      if (l.id !== activeList.id) return l;
+      return {
+        ...l,
+        items: l.items.map(it => it.id === itemId ? { ...it, done: !it.done, toggledAt: Date.now() } : it)
+      };
+    }));
+  };
+
+  const deleteItem = (itemId) => {
+    if (!activeList) return;
+    setLists(prev => prev.map(l => {
+      if (l.id !== activeList.id) return l;
+      return { ...l, items: l.items.filter(it => it.id !== itemId) };
+    }));
+  };
+
+  // ------- UI -------
   return (
     <div className="app-bg">
       <header className="app-header">
         <h1 className="app-title">Serena's Schedule</h1>
         <p className="app-sub">Points & Rewards • Total Points: <strong>{points}</strong></p>
         <div className="tabs">
-          {["tasks","rewards","history"].map(t => (
+          {["tasks","rewards","history","checklists"].map(t => (
             <button key={t} className={`tab ${tab===t ? "tab--active" : ""}`} onClick={()=>setTab(t)}>
-              {t === "tasks" ? "Tasks" : t === "rewards" ? "Rewards" : "History"}
+              {t === "tasks" ? "Tasks" : t === "rewards" ? "Rewards" : t === "history" ? "History" : "Checklists"}
             </button>
           ))}
         </div>
       </header>
 
       <main className="space">
+        {/* TASKS */}
         {tab === "tasks" && (
           <>
             <section className="card" style={{marginBottom:12}}>
@@ -168,7 +229,7 @@ export default function TaskTracker() {
                   const isCelebrating = celebrate && celebrate.id === t.id;
                   return (
                     <li key={t.id} className={`task ${t.done ? "task--done" : ""}`} style={{ position: "relative", overflow: "hidden" }}>
-                      {/* Floating +points popup */}
+                      {/* Floating +points */}
                       <AnimatePresence>
                         {isCelebrating && (
                           <motion.div
@@ -177,12 +238,7 @@ export default function TaskTracker() {
                             animate={{ opacity: 1, y: -24, scale: 1 }}
                             exit={{ opacity: 0, y: -40, scale: 0.95 }}
                             transition={{ duration: 0.9, ease: "easeOut" }}
-                            style={{
-                              position: "absolute",
-                              right: 12,
-                              top: 8,
-                              fontWeight: 800
-                            }}
+                            style={{ position: "absolute", right: 12, top: 8, fontWeight: 800 }}
                           >
                             +{celebrate.points} pts
                           </motion.div>
@@ -200,12 +256,9 @@ export default function TaskTracker() {
                                 exit={{ scale: 0.6, opacity: 0 }}
                                 transition={{ duration: 0.45, times: [0, 0.6, 1] }}
                                 style={{
-                                  width: 32,
-                                  height: 32,
-                                  borderRadius: 999,
+                                  width: 32, height: 32, borderRadius: 999,
                                   background: "linear-gradient(135deg,#10b981,#34d399)",
-                                  display: "grid",
-                                  placeItems: "center",
+                                  display: "grid", placeItems: "center",
                                   boxShadow: "0 8px 18px rgba(16,185,129,.45)"
                                 }}
                               >
@@ -243,6 +296,7 @@ export default function TaskTracker() {
           </>
         )}
 
+        {/* REWARDS */}
         {tab === "rewards" && (
           <section className="card" style={{display:"grid", gap:10}}>
             {REWARDS.map(r => (
@@ -261,6 +315,7 @@ export default function TaskTracker() {
           </section>
         )}
 
+        {/* HISTORY */}
         {tab === "history" && (
           <section className="card" style={{display:"grid", gap:12}}>
             <div>
@@ -299,9 +354,101 @@ export default function TaskTracker() {
             </div>
           </section>
         )}
+
+        {/* CHECKLISTS */}
+        {tab === "checklists" && (
+          <>
+            {/* Sub-tabs for lists */}
+            <section className="card" style={{marginBottom:12}}>
+              <div style={{display:"flex", gap:8, overflowX:"auto", paddingBottom:6}}>
+                {lists.map(l => (
+                  <button
+                    key={l.id}
+                    className={`tab ${activeListId === l.id ? "tab--active" : ""}`}
+                    onClick={()=>setActiveListId(l.id)}
+                    style={{whiteSpace:"nowrap"}}
+                  >
+                    {l.name}
+                  </button>
+                ))}
+              </div>
+              <div className="add-row" style={{marginTop:8}}>
+                <input className="input" placeholder="New checklist name (e.g., Groceries)" value={newListName} onChange={e=>setNewListName(e.target.value)} />
+                <button className="btn" onClick={addList}>Add List</button>
+                {activeList && (
+                  <button className="tab" onClick={()=>deleteList(activeList.id)}>Delete Current</button>
+                )}
+              </div>
+            </section>
+
+            {/* Items: left = unchecked, right = checked */}
+            <section className="card">
+              <div className="add-row" style={{marginBottom:10}}>
+                <input className="input" placeholder="Add an item" value={newItemText} onChange={e=>setNewItemText(e.target.value)} />
+                <button className="btn" onClick={addItem}>Add</button>
+              </div>
+
+              {!activeList ? (
+                <div className="task-meta">Create a checklist to get started.</div>
+              ) : (
+                <div style={{display:"grid", gridTemplateColumns:"1fr 1fr", gap:12}}>
+                  {/* Unchecked */}
+                  <div>
+                    <h3 style={{margin:"0 0 8px 0"}}>To Get</h3>
+                    <ul style={{listStyle:"none", padding:0, margin:0, display:"grid", gap:8}}>
+                      <AnimatePresence>
+                        {unchecked.map(it => (
+                          <motion.li
+                            key={it.id}
+                            initial={{opacity:0, x:-10}}
+                            animate={{opacity:1, x:0}}
+                            exit={{opacity:0, x:-10}}
+                            className="task"
+                          >
+                            <label style={{display:"flex", alignItems:"center", gap:10, flex:1}}>
+                              <input type="checkbox" checked={false} onChange={()=>toggleItem(it.id)} />
+                              <span>{it.text}</span>
+                            </label>
+                            <button className="tab" onClick={()=>deleteItem(it.id)}>Delete</button>
+                          </motion.li>
+                        ))}
+                      </AnimatePresence>
+                      {unchecked.length === 0 && <li className="task-meta">Nothing here. Add an item!</li>}
+                    </ul>
+                  </div>
+
+                  {/* Checked */}
+                  <div>
+                    <h3 style={{margin:"0 0 8px 0"}}>Have / Done</h3>
+                    <ul style={{listStyle:"none", padding:0, margin:0, display:"grid", gap:8}}>
+                      <AnimatePresence>
+                        {checked.map(it => (
+                          <motion.li
+                            key={it.id}
+                            initial={{opacity:0, x:10}}
+                            animate={{opacity:1, x:0}}
+                            exit={{opacity:0, x:10}}
+                            className="task task--done"
+                          >
+                            <label style={{display:"flex", alignItems:"center", gap:10, flex:1}}>
+                              <input type="checkbox" checked={true} onChange={()=>toggleItem(it.id)} />
+                              <span style={{textDecoration:"line-through", opacity:.85}}>{it.text}</span>
+                            </label>
+                            <button className="tab" onClick={()=>deleteItem(it.id)}>Delete</button>
+                          </motion.li>
+                        ))}
+                      </AnimatePresence>
+                      {checked.length === 0 && <li className="task-meta">No checked items yet.</li>}
+                    </ul>
+                  </div>
+                </div>
+              )}
+            </section>
+          </>
+        )}
       </main>
 
-      {/* Global confetti overlay */}
+      {/* Global confetti */}
       <AnimatePresence>
         {confetti.length > 0 && (
           <motion.div
@@ -314,9 +461,7 @@ export default function TaskTracker() {
               left: "50%",
               top: "20%",
               transform: "translateX(-50%)",
-              width: 0,
-              height: 0,
-              zIndex: 60
+              width: 0, height: 0, zIndex: 60
             }}
           >
             {confetti.map(p => (
@@ -326,13 +471,9 @@ export default function TaskTracker() {
                 animate={{ x: p.x + p.drift, y: 160 + Math.random()*60, rotate: p.rot }}
                 transition={{ duration: p.dur, ease: "easeOut" }}
                 style={{
-                  position: "absolute",
-                  display: "inline-block",
-                  width: p.r,
-                  height: p.r,
-                  borderRadius: 2,
-                  background: p.color,
-                  boxShadow: "0 4px 12px rgba(0,0,0,.25)"
+                  position: "absolute", display: "inline-block",
+                  width: p.r, height: p.r, borderRadius: 2,
+                  background: p.color, boxShadow: "0 4px 12px rgba(0,0,0,.25)"
                 }}
               />
             ))}
