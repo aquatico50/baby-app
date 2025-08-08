@@ -751,15 +751,21 @@ export default function TaskTracker() {
               ) : (
                 <ul style={{ listStyle:"none", padding:0, margin:0, display: "grid", gap: 8 }}>
                   {coupons.slice().reverse().map(c => (
-                    <li key={c.id} className="task">
-                      <div>
-                        <div style={{fontWeight:800}}>{c.label}</div>
-                        <div className="task-meta">
-                          Earned {new Date(c.date).toLocaleString()} · {c.cost} pts
-                        </div>
-                      </div>
-                      <button className="btn" onClick={()=>useCoupon(c.id)}>Use</button>
-                    </li>
+                    <li key={c.id} className="coupon coupon--held">
+  <span className="cut" aria-hidden="true"></span>
+
+  <div>
+    <div className="title">{c.label}</div>
+    <div className="task-meta">
+      Earned {new Date(c.date).toLocaleString()}
+    </div>
+  </div>
+
+  <div style={{display:"grid", gap:8, justifyItems:"end"}}>
+    <div className="badge">{c.cost} pts</div>
+    <button className="btn" onClick={()=>useCoupon(c.id)}>Use</button>
+  </div>
+</li>
                   ))}
                 </ul>
               )}
