@@ -271,33 +271,84 @@ body{margin:0;font-family:Inter,system-ui,Segoe UI,Roboto,Arial,sans-serif;color
   box-shadow: 0 8px 18px rgba(229,228,226,.40);
 }
 
-/* ===== Sparkle Effect for Coupons & Rewards ===== */
-@keyframes sparkle {
-  0% { background-position: 0% 0%; }
-  50% { background-position: 100% 100%; }
-  100% { background-position: 0% 0%; }
+/* stronger, but still classy, tier tints */
+.coupon--small{
+  box-shadow: 0 10px 24px rgba(205,127,50,.18);
+  background:
+    linear-gradient(180deg, rgba(205,127,50,.12), rgba(0,0,0,0) 60%),
+    radial-gradient(120% 180% at 100% 0%, rgba(205,127,50,.22), rgba(0,0,0,0) 60%),
+    rgba(15,15,30,.55);
 }
 
-.coupon { position: relative; overflow: hidden; }
+.coupon--medium{
+  box-shadow: 0 10px 24px rgba(192,192,192,.18);
+  background:
+    linear-gradient(180deg, rgba(192,192,192,.12), rgba(0,0,0,0) 60%),
+    radial-gradient(120% 180% at 100% 0%, rgba(192,192,192,.26), rgba(0,0,0,0) 60%),
+    rgba(15,15,30,.58);
+}
 
-/* moving diagonal highlight that doesn’t block clicks */
-.coupon::after {
-  content: "";
-  position: absolute;
-  inset: 0;
-  background-image: linear-gradient(
-    125deg,
-    rgba(255,255,255,0) 40%,
-    rgba(255,255,255,0.40) 50%,
-    rgba(255,255,255,0) 60%
-  );
-  background-size: 300% 300%;
-  animation: sparkle 3s infinite;
-  pointer-events: none;
+.coupon--large{
+  box-shadow: 0 10px 24px rgba(255,215,0,.20);
+  background:
+    linear-gradient(180deg, rgba(255,215,0,.10), rgba(0,0,0,0) 60%),
+    radial-gradient(120% 180% at 100% 0%, rgba(255,215,0,.24), rgba(0,0,0,0) 60%),
+    rgba(15,15,30,.60);
+}
+
+.coupon--special{
+  box-shadow: 0 12px 26px rgba(229,228,226,.24);
+  background:
+    linear-gradient(180deg, rgba(229,228,226,.12), rgba(0,0,0,0) 60%),
+    radial-gradient(120% 180% at 100% 0%, rgba(229,228,226,.28), rgba(0,0,0,0) 60%),
+    rgba(15,15,30,.63);
+}
+
+/* ===== Sparkle Effect (v2) ===== */
+@keyframes twinkle {
+  0%,100% { opacity:.15; transform: translateY(0) }
+  50%     { opacity:.35; transform: translateY(-2px) }
+}
+@keyframes sheen {
+  0%   { transform: translate(-120%, -120%) rotate(15deg); }
+  50%  { transform: translate(20%, 20%) rotate(15deg); }
+  100% { transform: translate(120%, 120%) rotate(15deg); }
+}
+
+/* keep relative so layers position correctly */
+.coupon { position: relative; overflow: hidden; }
+.coupon > * { position: relative; z-index: 1; }
+
+/* tiny star field behind content */
+.coupon::before{
+  content:"";
+  position:absolute; inset:0;
+  z-index:0; pointer-events:none;
+  background:
+    radial-gradient(2px 2px at 10% 20%, rgba(255,255,255,.45), transparent 60%),
+    radial-gradient(2px 2px at 80% 30%, rgba(255,255,255,.35), transparent 60%),
+    radial-gradient(1.5px 1.5px at 30% 70%, rgba(255,255,255,.35), transparent 60%),
+    radial-gradient(1.5px 1.5px at 60% 50%, rgba(255,255,255,.35), transparent 60%),
+    radial-gradient(1.5px 1.5px at 90% 80%, rgba(255,255,255,.35), transparent 60%);
+  animation: twinkle 4.5s ease-in-out infinite;
   mix-blend-mode: screen;
 }
 
-/* Respect users who prefer reduced motion */
-@media (prefers-reduced-motion: reduce) {
-  .coupon::after { animation: none; }
+/* soft moving sheen above content */
+.coupon::after{
+  content:"";
+  position:absolute; inset:-40%;
+  z-index:2; pointer-events:none;
+  background: linear-gradient(125deg,
+    rgba(255,255,255,0) 44%,
+    rgba(255,255,255,.35) 50%,
+    rgba(255,255,255,0) 56%
+  );
+  animation: sheen 3.2s linear infinite;
+  mix-blend-mode: screen;
+}
+
+/* accessibility */
+@media (prefers-reduced-motion: reduce){
+  .coupon::before, .coupon::after { animation: none; }
 }
