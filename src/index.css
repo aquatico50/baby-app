@@ -1,76 +1,131 @@
-/* ======= Day schedule layout ======= */
-.day-grid{ display:grid; grid-template-columns:1fr; gap:10px }
-.day-hour{ display:grid; grid-template-columns:72px 1fr; gap:10px; align-items:start }
-.day-hour-label{ color:rgba(255,255,255,.85); font-weight:800; letter-spacing:.5px }
+/* ---- THEME ---- */
+:root{
+  --purple-900:#2a0f63;
+  --purple-700:#6d28d9;
+  --purple-500:#a78bfa;
+  --white-90:rgba(255,255,255,.92);
+  --white-70:rgba(255,255,255,.70);
+  --white-18:rgba(255,255,255,.18);
+  --white-28:rgba(255,255,255,.28);
+}
+
+*{box-sizing:border-box}
+html,body,#root{height:100%}
+body{margin:0;font-family:Inter,system-ui,Segoe UI,Roboto,Arial,sans-serif;color:#fff;background:#0b0329}
+
+.app-bg{
+  min-height:100%;
+  background:
+    radial-gradient(1200px 600px at 85% -10%, #b794f4 0%, rgba(183,148,244,0) 60%),
+    radial-gradient(900px 500px at 10% 0%, #7c3aed 0%, rgba(124,58,237,0) 50%),
+    linear-gradient(135deg, #2b146b 0%, #4b1fb3 45%, #6d28d9 100%);
+  padding:16px 16px 96px;
+}
+
+/* ---- GLASS CARD ---- */
+.card{
+  background:rgba(15,15,30,.35);
+  border:1px solid var(--white-18);
+  border-radius:18px;
+  padding:14px;
+  box-shadow:0 12px 28px rgba(0,0,0,.35);
+  backdrop-filter: blur(14px) saturate(160%);
+}
+
+/* ---- HEADER + MENU ---- */
+.app-header{
+  position:sticky; top:0; z-index:10;
+  margin-bottom:12px; padding:12px 14px;
+  border-radius:18px; background:rgba(15,15,30,.45);
+  border:1px solid var(--white-18); backdrop-filter:blur(12px) saturate(160%);
+  display:flex; align-items:center; justify-content:space-between; gap:12px;
+}
+.app-title{margin:0;font-size:22px;font-weight:900;letter-spacing:.2px}
+.app-sub{margin:2px 0 0;color:var(--white-70);font-size:12px}
+.menu-btn{
+  border:none; border-radius:12px; padding:10px 14px; font-weight:800; color:#fff;
+  background:linear-gradient(90deg,#7c3aed,#a78bfa); box-shadow:0 10px 18px rgba(124,58,237,.35);
+}
+
+/* ---- MENU POPUP ---- */
+.menu{
+  position:absolute; right:0; top:110%;
+  background:rgba(15,15,30,.9); border:1px solid var(--white-28);
+  border-radius:14px; padding:8px; display:grid; gap:6px; min-width:190px;
+}
+.menu-item{
+  border:none; text-align:left; color:#fff; padding:10px 12px; border-radius:10px;
+  background:rgba(255,255,255,.08); box-shadow:inset 0 0 0 1px var(--white-18);
+}
+.menu-item.active{ background:linear-gradient(90deg,#7c3aed,#a78bfa); }
+
+/* ---- INPUTS / BUTTONS ---- */
+.input, .select{
+  border-radius:12px; border:1px solid var(--white-28);
+  background:rgba(255,255,255,.14); color:#fff; padding:10px 12px;
+}
+.input::placeholder{color:var(--white-70)}
+.btn{
+  border:none; border-radius:12px; padding:10px 14px; font-weight:800; color:#fff;
+  background:linear-gradient(90deg,#5b21b6,#7c3aed); box-shadow:0 10px 18px rgba(91,33,182,.35);
+}
+
+/* ---- DAY GRID (borders + sticky times) ---- */
+.day-grid{ display:grid; grid-template-columns:1fr; gap:6px; }
+.day-hour{
+  display:grid; grid-template-columns:72px 1fr; gap:10px; align-items:start;
+  border-bottom:1px solid var(--white-18); padding-bottom:8px;
+}
+.day-hour-label{ font-weight:900; color:var(--white-90) }
 .day-hour-items{ display:grid; gap:8px }
 
-/* ======= Month grid ======= */
-.month-grid{
-  display:grid;
-  grid-template-columns: repeat(7, 1fr);
-  gap:8px;
+/* ---- TASK CHIP ---- */
+.task{
+  display:flex; justify-content:space-between; align-items:center; gap:8px;
+  background:rgba(255,255,255,.10); border:1px solid var(--white-18);
+  border-radius:14px; padding:10px 12px;
 }
-.month-head{ text-align:center; font-weight:700; opacity:.85 }
+.task--done{ opacity:.75 }
+.task-meta{ color:var(--white-70); font-size:12px }
+
+/* ---- MONTH ---- */
+.month-grid{ display:grid; grid-template-columns:repeat(7,1fr); gap:8px }
+.month-head{ text-align:center; font-weight:800; color:var(--white-90) }
 .month-cell{
-  padding:8px; border-radius:12px;
-  background: rgba(255,255,255,.08);
-  border:1px solid rgba(255,255,255,.14);
-  min-height:90px; display:flex; flex-direction:column; gap:6px;
+  padding:8px; border-radius:12px; min-height:96px;
+  background:rgba(15,15,30,.35); border:1px solid var(--white-18);
+  display:flex; flex-direction:column; gap:6px;
 }
 .month-fade{ opacity:.55 }
-.month-date-row{ display:flex; align-items:center; justify-content:space-between; gap:6px }
-.month-date{ font-weight:800; border:none; background:transparent; color:#fff }
-.month-add{ border:none; border-radius:999px; width:26px; height:26px; background:linear-gradient(90deg,#7c3aed,#a78bfa); color:#fff; }
+.month-date-row{ display:flex; justify-content:space-between; align-items:center; }
+.month-date{ font-weight:900; color:#fff; background:transparent; border:none }
+.month-add{
+  width:26px; height:26px; border:none; border-radius:999px; color:#fff;
+  background:linear-gradient(90deg,#7c3aed,#a78bfa);
+}
 .month-items{ display:grid; gap:4px }
 .month-chip{
   font-size:12px; padding:4px 6px; border-radius:8px;
-  background: rgba(255,255,255,.14); border:1px solid rgba(255,255,255,.18);
+  background:rgba(255,255,255,.12); border:1px solid var(--white-18);
 }
-.month-chip-done{ text-decoration: line-through; opacity:.8 }
+.month-chip-done{ text-decoration:line-through; opacity:.85 }
 
-/* ======= Year grid ======= */
-.year-grid{
-  display:grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap:12px;
-}
-.year-cell{ padding:10px; border-radius:12px; background:rgba(255,255,255,.08); border:1px solid rgba(255,255,255,.14) }
-.year-head{ display:flex; align-items:center; justify-content:space-between; margin-bottom:8px }
-/* ===== Layout with left sidebar ===== */
-.layout{ display:grid; grid-template-columns: 180px 1fr; gap:16px }
-@media (max-width: 800px){ .layout{ grid-template-columns: 1fr } .sidebar{ position:sticky; top:8px } }
+/* ---- YEAR ---- */
+.year-grid{ display:grid; grid-template-columns:repeat(2,1fr); gap:12px }
+.year-cell{ padding:10px; border-radius:12px; background:rgba(15,15,30,.35); border:1px solid var(--white-18) }
+.year-head{ display:flex; justify-content:space-between; align-items:center; margin-bottom:6px }
 
-.sidebar{
-  background: linear-gradient(180deg, rgba(255,255,255,.14), rgba(255,255,255,.06));
-  backdrop-filter: blur(10px) saturate(140%);
-  border:1px solid var(--white-24);
-  border-radius:16px;
-  padding:12px;
-  box-shadow: 0 8px 24px rgba(0,0,0,.25);
+/* ---- TOAST ---- */
+.toast{
+  position:fixed; left:50%; bottom:20px; transform:translateX(-50%);
+  background:rgba(0,0,0,.85); color:#fff; border-radius:999px; padding:10px 16px;
+  box-shadow:0 8px 24px rgba(0,0,0,.4); z-index:60;
 }
-.sidebar-title{ font-weight:800; margin-bottom:8px }
-.sidebar-tabs{ display:grid; gap:6px }
-.sidebar-tab{
-  border:none; border-radius:12px; padding:10px 12px; text-align:left;
-  color:#fff; background:rgba(255,255,255,.12); box-shadow: inset 0 0 0 1px var(--white-24);
-}
-.sidebar-tab--active{
-  background:linear-gradient(90deg,#7c3aed,#a78bfa);
-  box-shadow:0 8px 20px rgba(124,58,237,.45);
-}
-.sidebar-points{ margin-top:12px; }
+.spacer{height:24px}
 
-/* ===== Day grid with borders & sticky times ===== */
-.day-grid.bordered{ border-top:1px solid rgba(255,255,255,.18) }
-.day-grid.bordered .day-hour{
-  border-bottom:1px solid rgba(255,255,255,.18);
-  padding-bottom:8px; margin-bottom:8px;
-}
-.sticky-time{ position:sticky; left:0 }
-
-/* ===== Action bubble on long-press ===== */
+/* ---- little action bubble when long-press ---- */
 .action-bubble{
-  position:absolute; right:8px; top:-8px;
-  background:rgba(0,0,0,.7); border:1px solid rgba(255,255,255,.2);
-  color:#fff; border-radius:12px; padding:6px; display:flex; gap:6px; z-index:5;
+  position:absolute; right:8px; top:-8px; z-index:5;
+  background:rgba(0,0,0,.8); border:1px solid var(--white-28);
+  color:#fff; border-radius:12px; padding:6px; display:flex; gap:6px;
 }
