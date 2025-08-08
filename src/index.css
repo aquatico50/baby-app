@@ -391,3 +391,79 @@ body{
   0%   { transform: translate(0, 0); }
   100% { transform: translate(-10px, -10px); }
 }
+
+
+/* ===== Cross-browser coupon layout (Android + Safari + Firefox) ===== */
+
+/* Two columns: text left, actions right (fixed width) */
+.coupon{
+  position: relative;
+  display: grid;
+  grid-template-columns: 1fr 132px;   /* actions column is fixed so it never shifts */
+  grid-auto-rows: minmax(140px, auto);
+  column-gap: 14px;
+  padding: 16px;
+  border-radius: 12px;
+  overflow: hidden;
+  isolation: isolate;                 /* stable stacking context for all browsers */
+}
+
+/* left column (first inner DIV = title/tier) */
+.coupon > div:nth-of-type(1){
+  min-width: 0;                        /* allow wrapping */
+  align-self: start;
+  position: relative;
+  z-index: 3;
+}
+
+/* right column (second inner DIV = badge + button) */
+.coupon > div:nth-of-type(2){
+  display: grid;
+  grid-template-rows: auto 1fr auto;   /* badge on top, spacer, button bottom */
+  align-items: end;
+  justify-items: end;
+  row-gap: 10px;
+  position: relative;
+  z-index: 3;
+}
+
+/* ensure badge + button aren’t absolutely positioned anywhere else */
+.coupon .badge,
+.coupon .btn{
+  position: static !important;
+  margin: 0 !important;
+}
+
+/* keep text above background */
+.coupon .title,
+.coupon .tier{
+  position: relative;
+  z-index: 3;
+}
+
+/* sparkle layers: visible everywhere without blend quirks */
+.coupon .fx-stars,
+.coupon .fx-sheen{
+  position: absolute;
+  inset: 0;
+  z-index: 4;                          /* OVER text, badge, and button as requested */
+  pointer-events: none;
+  opacity: .35;                         /* looks good on Safari/Firefox/Android */
+  will-change: transform, opacity;
+}
+
+/* Safari tweak (detects WebKit backdrop support) */
+@supports (-webkit-backdrop-filter: blur(1px)){
+  .coupon .fx-stars,
+  .coupon .fx-sheen{
+    opacity: .42;                       /* a touch brighter on Safari */
+  }
+}
+
+/* keep the perforation cut line on top of sparkles */
+.coupon .cut{ z-index: 6; }
+
+/* small-screen tightening (optional) */
+@media (max-width: 420px){
+  .coupon{ grid-template-columns: 1fr 120px; padding: 14px; }
+}
