@@ -141,10 +141,10 @@ body{
   color:#fff; border-radius:12px; padding:6px; display:flex; gap:6px;
 }
 
-/* Center header + cards and constrain width so they fit on small screens */
+/* Center header + cards */
 .app-header, .card { max-width: 900px; margin: 0 auto; }
 
-/* On very small screens, tighten paddings so it doesn't overflow */
+/* Small screens tweaks */
 @media (max-width: 420px){
   .card { padding: 10px; }
   .month-grid { gap: 6px; }
@@ -153,7 +153,6 @@ body{
 
 /* ===================== COUPONS ===================== */
 
-/* Base coupon look (glass + warm gradient) */
 .coupon{
   position:relative;
   border-radius:16px;
@@ -166,11 +165,14 @@ body{
     linear-gradient(180deg, rgba(14,14,28,.92), rgba(14,14,28,.74));
   box-shadow:0 14px 28px rgba(0,0,0,.35);
   backdrop-filter: blur(10px) saturate(150%);
-  isolation:isolate; /* keeps blends inside */
+  isolation:isolate;
   min-height:140px;
 }
 
-/* side notches */
+/* Remove perforation line down the middle */
+.coupon .cut{ display:none }
+
+/* Keep the notch “holes” */
 .coupon::before,.coupon::after{
   content:""; position:absolute; width:18px; height:18px; top:50%;
   transform:translateY(-50%); background: var(--purple-900); border-radius:50%;
@@ -178,22 +180,15 @@ body{
 }
 .coupon::before{ left:-9px } .coupon::after{ right:-9px }
 
-/* perforation line */
-.coupon .cut{
-  position:absolute; left: 50%; top: 8px; bottom: 8px; width: 2px; transform: translateX(-50%);
-  background: repeating-linear-gradient(
-    to bottom,
-    rgba(255,255,255,.35), rgba(255,255,255,.35) 6px,
-    rgba(255,255,255,0) 6px, rgba(255,255,255,0) 12px
-  );
-  opacity:.6; z-index:6;
-}
-
 /* Title + tier text */
 .coupon .title{ font-weight:900; font-size:20px; line-height:1.2 }
 .coupon .tier{ font-size: 13px; color: var(--white-70); }
 
-/* Badge + button anchored in corners (Android look) */
+/* Emoji next to title */
+.coupon .title-row{ display:flex; align-items:center; gap:10px }
+.coupon .emoji{ font-size:22px; line-height:1 }
+
+/* Points badge + Redeem button anchored in corners */
 .coupon .badge{
   position:absolute; left:16px; bottom:16px; z-index:4;
   padding: 8px 12px; border-radius:999px; font-weight:800;
@@ -204,7 +199,7 @@ body{
   position:absolute; right:16px; bottom:16px; z-index:4;
 }
 
-/* Sparkle stars (subtle), on TOP of content */
+/* Sparkle layers (on top of content) */
 .coupon .fx-stars{
   position:absolute; inset:0; pointer-events:none; z-index:5; opacity:.40;
   background:
@@ -215,8 +210,6 @@ body{
     radial-gradient(1.6px 1.6px at 90% 80%, rgba(255,255,255,.45), transparent 60%);
   animation: fxTwinkle 4.2s ease-in-out infinite;
 }
-
-/* Sheen sweep across coupon (also above content) */
 .coupon .fx-sheen{
   position:absolute; inset:-60% -60% auto auto; pointer-events:none; z-index:5; opacity:.45;
   width: 220%; height: 220%;
@@ -227,26 +220,57 @@ body{
   animation: fxSheen 2.8s linear infinite;
 }
 
-/* Keep text above background layer */
+/* Make sure text is above background layer */
 .coupon .title, .coupon .tier{ position:relative; z-index:4 }
 
-/* Coupon variants when “held” in coupon box (slightly brighter) */
-.coupon--held{
-  border-style: solid;
+/* Tier looks */
+.coupon--small{
+  border-color: rgba(205,127,50,.55);
   background:
-    radial-gradient(130% 140% at 0% 0%, rgba(183,148,244,.25), rgba(0,0,0,0) 60%),
-    radial-gradient(130% 140% at 100% 100%, rgba(124,58,237,.22), rgba(0,0,0,0) 60%),
-    linear-gradient(180deg, rgba(18,18,36,.96), rgba(18,18,36,.78));
+    radial-gradient(120% 180% at 100% 0%, rgba(205,127,50,.18), rgba(0,0,0,0) 60%),
+    rgba(15,15,30,.62);
+}
+.coupon--small .badge{
+  background: linear-gradient(90deg,#b87333,#cd7f32);
+  box-shadow: 0 10px 22px rgba(205,127,50,.35);
 }
 
-/* Stars/Sheen blend mode in Safari (backdrop-filter quirk) */
+.coupon--medium{
+  border-color: rgba(192,192,192,.55);
+  background:
+    radial-gradient(120% 180% at 100% 0%, rgba(192,192,192,.22), rgba(0,0,0,0) 60%),
+    rgba(15,15,30,.64);
+}
+.coupon--medium .badge{
+  background: linear-gradient(90deg,#9ea7ad,#c0c0c0);
+  box-shadow: 0 10px 22px rgba(192,192,192,.35);
+}
+
+.coupon--large{
+  border-color: rgba(255,215,0,.55);
+  background:
+    radial-gradient(120% 180% at 100% 0%, rgba(255,215,0,.20), rgba(0,0,0,0) 60%),
+    rgba(15,15,30,.66);
+}
+.coupon--large .badge{
+  background: linear-gradient(90deg,#d4af37,#ffd700);
+  box-shadow: 0 10px 22px rgba(255,215,0,.35);
+}
+
+.coupon--special{
+  border-color: rgba(229,228,226,.65);
+  background:
+    radial-gradient(120% 180% at 100% 0%, rgba(229,228,226,.22), rgba(0,0,0,0) 60%),
+    rgba(15,15,30,.68);
+}
+.coupon--special .badge{
+  background: linear-gradient(90deg,#cfd2d3,#e5e4e2);
+  box-shadow: 0 10px 22px rgba(229,228,226,.40);
+}
+
+/* Safari blend tweak */
 @supports (-webkit-backdrop-filter: blur(1px)){
   .coupon .fx-stars, .coupon .fx-sheen{ mix-blend-mode: lighten; -webkit-transform:translateZ(0) }
-}
-
-/* Small screens: let coupon breathe but not overflow */
-@media (max-width: 420px){
-  .coupon{ padding:14px; }
 }
 
 /* Animations */
