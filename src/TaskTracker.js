@@ -1,3 +1,4 @@
+import RewardsTab from "./RewardsTab";
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 
@@ -502,14 +503,16 @@ export default function TaskTracker() {
       )}
 
       {/* -------- REWARDS (with Coupon Box) -------- */}
-      {tab === "rewards" && (
-        <section className="card" style={{ display: "grid", gap: 12 }}>
-          <div style={{display:"flex", justifyContent:"space-between", alignItems:"center", flexWrap:"wrap", gap:8}}>
-            <div className="task-meta">Your points: <strong>{points}</strong></div>
-            <button className="menu-btn" onClick={()=>setShowCoupons(v=>!v)}>
-              {showCoupons ? "← Back to Rewards" : "🎟 Open Coupon Box"}
-            </button>
-          </div>
+      <RewardsTab
+  tab={tab}
+  points={points}
+  showCoupons={showCoupons}
+  setShowCoupons={setShowCoupons}
+  coupons={coupons}
+  useCoupon={useCoupon}
+  REWARDS={REWARDS}
+  redeem={redeem}
+/>
 
           {/* Coupon Box */}
           {showCoupons ? (
