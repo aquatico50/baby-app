@@ -323,3 +323,71 @@ body{
 @media (prefers-reduced-motion: reduce){
   .coupon .fx-stars, .coupon .fx-sheen { animation: none; }
 }
+
+/* === Universal Coupon Layout for Android + Safari === */
+
+.coupon {
+  position: relative;
+  padding: 16px;
+  padding-bottom: 64px;   /* Space for badge + button */
+  min-height: 140px;
+  isolation: isolate;     /* Required for Safari blend modes */
+  overflow: hidden;
+  border-radius: 12px;
+}
+
+/* Keep title and tier info up top */
+.coupon .title,
+.coupon .tier {
+  margin: 0;
+  position: relative;
+  z-index: 3;
+}
+
+/* Points badge bottom-left */
+.coupon .badge {
+  position: absolute;
+  left: 16px;
+  bottom: 16px;
+  margin: 0;
+  z-index: 4;
+}
+
+/* Redeem button bottom-right */
+.coupon .btn {
+  position: absolute;
+  right: 16px;
+  bottom: 16px;
+  margin: 0;
+  z-index: 4;
+}
+
+/* Sparkle + shine overlay */
+.coupon .fx-stars,
+.coupon .fx-sheen {
+  position: absolute;
+  inset: 0;
+  z-index: 5;             /* Over text & buttons */
+  pointer-events: none;
+  opacity: 0.45;
+  will-change: opacity, transform;
+}
+
+/* Make Safari render blend effects properly */
+@supports (-webkit-backdrop-filter: blur(1px)) {
+  .coupon .fx-stars,
+  .coupon .fx-sheen {
+    mix-blend-mode: lighten;
+    -webkit-transform: translateZ(0);
+  }
+}
+
+/* Optional: subtle animation for sparkle movement */
+.coupon .fx-stars {
+  animation: sparkle-move 6s linear infinite;
+}
+
+@keyframes sparkle-move {
+  0%   { transform: translate(0, 0); }
+  100% { transform: translate(-10px, -10px); }
+}
