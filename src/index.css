@@ -222,3 +222,51 @@ body{margin:0;font-family:Inter,system-ui,Segoe UI,Roboto,Arial,sans-serif;color
   .coupon .cut{ display:none; }
   .badge{ justify-self: start; }
 }
+
+/* ===== Coupon tier looks ===== */
+.coupon .emoji{ font-size: 22px; margin-right: 8px }
+.coupon .title-row{ display:flex; align-items:center; gap:8px }
+
+.coupon--small{
+  border-color: rgba(205,127,50,.55); /* bronze */
+  background:
+    radial-gradient(120% 180% at 100% 0%, rgba(205,127,50,.18), rgba(0,0,0,0) 60%),
+    rgba(15,15,30,.55);
+}
+.coupon--small .badge{
+  background: linear-gradient(90deg,#b87333,#cd7f32);
+  box-shadow: 0 8px 18px rgba(205,127,50,.35);
+}
+
+.coupon--medium{
+  border-color: rgba(192,192,192,.55); /* silver */
+  background:
+    radial-gradient(120% 180% at 100% 0%, rgba(192,192,192,.22), rgba(0,0,0,0) 60%),
+    rgba(15,15,30,.58);
+}
+.coupon--medium .badge{
+  background: linear-gradient(90deg,#9ea7ad,#c0c0c0);
+  box-shadow: 0 8px 18px rgba(192,192,192,.35);
+}
+
+.coupon--large{
+  border-color: rgba(255,215,0,.55);   /* gold */
+  background:
+    radial-gradient(120% 180% at 100% 0%, rgba(255,215,0,.20), rgba(0,0,0,0) 60%),
+    rgba(15,15,30,.60);
+}
+.coupon--large .badge{
+  background: linear-gradient(90deg,#d4af37,#ffd700);
+  box-shadow: 0 8px 18px rgba(255,215,0,.35);
+}
+
+.coupon--special{
+  border-color: rgba(229,228,226,.65); /* platinum */
+  background:
+    radial-gradient(120% 180% at 100% 0%, rgba(229,228,226,.22), rgba(0,0,0,0) 60%),
+    rgba(15,15,30,.63);
+}
+.coupon--special .badge{
+  background: linear-gradient(90deg,#cfd2d3,#e5e4e2);
+  box-shadow: 0 8px 18px rgba(229,228,226,.40);
+}
