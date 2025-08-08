@@ -1,6 +1,6 @@
-import RewardsTab from "./RewardsTab";
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
+import RewardsTab from "./RewardsTab";
 
 /* -------- CONFIG -------- */
 const CATEGORIES = [
@@ -14,31 +14,31 @@ const CATEGORIES = [
   { key: "other", label: "Other", points: 3 },
 ];
 
-/* New rewards list (with icons + tiers) */
+/* New rewards list (no emojis) */
 const REWARDS = [
   // Small (10–50)
-  { key: "foot",     label: "Foot massage",                         cost: 10,  tier: "Small",   icon: "🦶" },
-  { key: "back",     label: "Back rub",                              cost: 15,  tier: "Small",   icon: "💆‍♀️" },
-  { key: "diapers3", label: "I change the next 3 diapers",           cost: 20,  tier: "Small",   icon: "🍼" },
-  { key: "shower",   label: "Uninterrupted shower time",             cost: 25,  tier: "Small",   icon: "🫧" },
-  { key: "bedtime",  label: "I do the bedtime routine",              cost: 30,  tier: "Small",   icon: "🌙" },
-  { key: "snack",    label: "Favorite snack/dessert run",            cost: 50,  tier: "Small",   icon: "🍰" },
+  { key: "foot",     label: "Foot massage",                         cost: 10,  tier: "Small" },
+  { key: "back",     label: "Back rub",                              cost: 15,  tier: "Small" },
+  { key: "diapers3", label: "I change the next 3 diapers",           cost: 20,  tier: "Small" },
+  { key: "shower",   label: "Uninterrupted shower time",             cost: 25,  tier: "Small" },
+  { key: "bedtime",  label: "I do the bedtime routine",              cost: 30,  tier: "Small" },
+  { key: "snack",    label: "Favorite snack/dessert run",            cost: 50,  tier: "Small" },
 
   // Medium (75–150)
-  { key: "morning",  label: "I handle all baby duties (morning)",    cost: 75,  tier: "Medium",  icon: "☀️" },
-  { key: "spa",      label: "Full at-home spa setup",                cost: 100, tier: "Medium",  icon: "🕯️" },
-  { key: "breakfast",label: "Breakfast in bed",                      cost: 100, tier: "Medium",  icon: "🥞" },
-  { key: "housework",label: "I handle ALL housework for a day",      cost: 150, tier: "Medium",  icon: "🧹" },
+  { key: "morning",  label: "I handle all baby duties (morning)",    cost: 75,  tier: "Medium" },
+  { key: "spa",      label: "Full at-home spa setup",                cost: 100, tier: "Medium" },
+  { key: "breakfast",label: "Breakfast in bed",                      cost: 100, tier: "Medium" },
+  { key: "housework",label: "I handle ALL housework for a day",      cost: 150, tier: "Medium" },
 
   // Large (200–400)
-  { key: "date",     label: "Planned at-home date night",            cost: 200, tier: "Large",   icon: "💖" },
-  { key: "movie",    label: "Her choice: movie & snacks night",      cost: 200, tier: "Large",   icon: "🎬" },
-  { key: "daytrip",  label: "Day trip to a favorite place",          cost: 300, tier: "Large",   icon: "🧺" },
-  { key: "nochores", label: "No chores, no baby duty day",           cost: 400, tier: "Large",   icon: "🏖️" },
+  { key: "date",     label: "Planned at-home date night",            cost: 200, tier: "Large" },
+  { key: "movie",    label: "Her choice: movie & snacks night",      cost: 200, tier: "Large" },
+  { key: "daytrip",  label: "Day trip to a favorite place",          cost: 300, tier: "Large" },
+  { key: "nochores", label: "No chores, no baby duty day",           cost: 400, tier: "Large" },
 
   // Special (500+)
-  { key: "weekend",  label: "Weekend getaway",                       cost: 500, tier: "Special", icon: "✈️" },
-  { key: "dreamday", label: "Her dream day (you plan everything)",   cost: 600, tier: "Special", icon: "🌟" },
+  { key: "weekend",  label: "Weekend getaway",                       cost: 500, tier: "Special" },
+  { key: "dreamday", label: "Her dream day (you plan everything)",   cost: 600, tier: "Special" },
 ];
 
 /* -------- HELPERS -------- */
@@ -71,24 +71,13 @@ const makeConfetti = (n = 18) =>
     drift: (Math.random() * 2 - 1) * 80,
   }));
 
-/* Map tier → CSS class (bronze/silver/gold/platinum) */
-const tierClass = (tier) => {
-  switch ((tier || "").toLowerCase()) {
-    case "small":   return "coupon coupon--small";
-    case "medium":  return "coupon coupon--medium";
-    case "large":   return "coupon coupon--large";
-    case "special": return "coupon coupon--special";
-    default:        return "coupon";
-  }
-};
-
 export default function TaskTracker() {
   /* nav + menu */
   const [tab, setTab] = useState(() => load("tab", "schedule"));
   const [menuOpen, setMenuOpen] = useState(false);
   useEffect(() => save("tab", tab), [tab]);
 
-  /* points + rewards */
+  /* points + rewards/coupons state */
   const [points, setPoints] = useState(() => load("points", 0));
   const [redemptions, setRedemptions] = useState(() => load("redemptions", []));
   const [coupons, setCoupons] = useState(() => load("coupons", [])); // earned, un-used
@@ -239,12 +228,11 @@ export default function TaskTracker() {
       reward: r.key,
       label: r.label,
       cost: r.cost,
-      icon: r.icon || "🎟️",
       tier: r.tier || "Small",
       date: new Date().toISOString(),
     };
 
-    setCoupons((prev) => [...prev, coupon]);          // add to Coupon Box
+    setCoupons((prev) => [...prev, coupon]);           // add to Coupon Box
     setRedemptions((prev) => [...prev, { ...coupon }]); // keep history
 
     setConfetti(makeConfetti(24));
@@ -502,95 +490,17 @@ export default function TaskTracker() {
         </section>
       )}
 
-      {/* -------- REWARDS (with Coupon Box) -------- */}
+      {/* -------- REWARDS (moved to component) -------- */}
       <RewardsTab
-  tab={tab}
-  points={points}
-  showCoupons={showCoupons}
-  setShowCoupons={setShowCoupons}
-  coupons={coupons}
-  useCoupon={useCoupon}
-  REWARDS={REWARDS}
-  redeem={redeem}
-/>
-
-          {/* Coupon Box */}
-          {showCoupons ? (
-            <div className="card" style={{ display: "grid", gap: 10 }}>
-              <div style={{fontWeight:900, marginBottom:4}}>Your Coupons</div>
-              {coupons.length === 0 ? (
-                <div className="task-meta">No coupons yet. Redeem a reward to add one here.</div>
-              ) : (
-                <ul style={{ listStyle:"none", padding:0, margin:0, display: "grid", gap: 8 }}>
-                  {coupons.slice().reverse().map(c => (
-                    <li key={c.id} className={tierClass(c.tier) + " coupon--held"}>
-                      <span className="cut" aria-hidden="true"></span>
-                      <span className="fx-stars" aria-hidden="true"></span>
-                      <span className="fx-sheen" aria-hidden="true"></span>
-
-                      <div>
-                        <div className="title-row">
-                          <span className="emoji" aria-hidden="true">{c.icon || "🎟️"}</span>
-                          <span className="title">{c.label}</span>
-                        </div>
-                        <div className="task-meta">Earned {new Date(c.date).toLocaleString()}</div>
-                      </div>
-                      <div style={{display:"grid", gap:8, justifyItems:"end"}}>
-                        <div className="badge">{c.cost} pts</div>
-                        <button className="btn" onClick={()=>useCoupon(c.id)}>Use</button>
-                      </div>
-                    </li>
-                  ))}
-                </ul>
-              )}
-            </div>
-          ) : (
-            /* Rewards List (grouped) */
-            <div className="card" style={{ display: "grid", gap: 14 }}>
-              {["Small","Medium","Large","Special"].map(tier => {
-                const list = REWARDS.filter(r => r.tier === tier);
-                return (
-                  <div key={tier} className="card" style={{ display:"grid", gap:10 }}>
-                    <div style={{fontWeight:900}}>{tier} Rewards</div>
-                    {list.map(r => (
-                      <div key={r.key} className={`coupon coupon--${r.tier.toLowerCase()}`}>
-  <span className="cut" aria-hidden="true"></span>
-
-  <div className="title-row">
-    {r.icon && <span className="emoji">{r.icon}</span>}
-    <div>
-      <div className="title">{r.label}</div>
-      <div className="tier">{r.tier} · Earned with points</div>
-    </div>
-  </div>
-
-  <div className="coupon-footer">
-    <span className="badge">{r.cost} pts</span>
-    <button
-      className="btn redeem"
-      disabled={points < r.cost}
-      onClick={() => redeem(r)}
-      style={{ opacity: points < r.cost ? 0.5 : 1 }}
-      aria-label={`Redeem ${r.label}`}
-    >
-      Redeem
-    </button>
-  </div>
-
-  {/* Sparkle overlays */}
-  <div className="fx-stars"></div>
-  <div className="fx-sheen"></div>
-</div>
-
-                      </div>
-                    ))}
-                  </div>
-                );
-              })}
-            </div>
-          )}
-        </section>
-      )}
+        tab={tab}
+        points={points}
+        showCoupons={showCoupons}
+        setShowCoupons={setShowCoupons}
+        coupons={coupons}
+        useCoupon={useCoupon}
+        REWARDS={REWARDS}
+        redeem={redeem}
+      />
 
       {/* -------- CHECKLISTS -------- */}
       {tab === "checklists" && (
