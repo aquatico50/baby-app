@@ -1,4 +1,4 @@
-7th/* ---- THEME ---- */
+/* ---- THEME ---- */
 :root{
   --purple-900:#2a0f63;
   --purple-700:#6d28d9;
@@ -11,8 +11,14 @@
 
 *{box-sizing:border-box}
 html,body,#root{height:100%}
-body{margin:0;font-family:Inter,system-ui,Segoe UI,Roboto,Arial,sans-serif;color:#fff;background:#0b0329}
+body{
+  margin:0;
+  font-family:Inter,system-ui,Segoe UI,Roboto,Arial,sans-serif;
+  color:#fff;
+  background:#0b0329;
+}
 
+/* ---- APP BACKGROUND ---- */
 .app-bg{
   min-height:100%;
   background:
@@ -71,7 +77,7 @@ body{margin:0;font-family:Inter,system-ui,Segoe UI,Roboto,Arial,sans-serif;color
 }
 
 /* ---- DAY GRID (borders + sticky times) ---- */
-.day-grid{ display:grid; grid-template-columns:1fr; gap:6px; }
+.day-grid{ display:grid; grid-template-columns:1fr; gap:6px; width:100% }
 .day-hour{
   display:grid; grid-template-columns:72px 1fr; gap:10px; align-items:start;
   border-bottom:1px solid var(--white-18); padding-bottom:8px;
@@ -89,12 +95,12 @@ body{margin:0;font-family:Inter,system-ui,Segoe UI,Roboto,Arial,sans-serif;color
 .task-meta{ color:var(--white-70); font-size:12px }
 
 /* ---- MONTH ---- */
-.month-grid{ display:grid; grid-template-columns:repeat(7,1fr); gap:8px }
+.month-grid{ display:grid; grid-template-columns:repeat(7,1fr); gap:8px; width:100% }
 .month-head{ text-align:center; font-weight:800; color:var(--white-90) }
 .month-cell{
   padding:8px; border-radius:12px; min-height:96px;
   background:rgba(15,15,30,.35); border:1px solid var(--white-18);
-  display:flex; flex-direction:column; gap:6px;
+  display:flex; flex-direction:column; gap:6px; min-width:0;
 }
 .month-fade{ opacity:.55 }
 .month-date-row{ display:flex; justify-content:space-between; align-items:center; }
@@ -123,35 +129,27 @@ body{margin:0;font-family:Inter,system-ui,Segoe UI,Roboto,Arial,sans-serif;color
 }
 .spacer{height:24px}
 
-/* ---- little action bubble when long-press ---- */
+/* ---- Action bubble (long-press) ---- */
 .action-bubble{
   position:absolute; right:8px; top:-8px; z-index:5;
   background:rgba(0,0,0,.8); border:1px solid var(--white-28);
   color:#fff; border-radius:12px; padding:6px; display:flex; gap:6px;
 }
 
-/* Center header + cards and constrain width so they fit on small screens */
-.app-header,
-.card {
-  max-width: 900px;     /* adjust narrower or wider if you like */
-  margin: 0 auto;
+/* Center header + cards and constrain width so they fit */
+.app-header, .card{ max-width:900px; margin:0 auto; }
+
+/* On very small screens, tighten paddings */
+@media (max-width: 420px){
+  .card { padding:10px; }
+  .month-grid { gap:6px; }
+  .month-cell { padding:6px; }
 }
 
-/* Make the day grid fill the card’s width */
-.day-grid { width: 100%; }
+/* =========================
+   COUPON STYLES
+   ========================= */
 
-/* Month grid should never spill right; keep inside card */
-.month-grid { width: 100%; }
-.month-cell { min-width: 0; }  /* let cells shrink if needed */
-
-/* On very small screens, tighten paddings so it doesn't overflow */
-@media (max-width: 420px) {
-  .card { padding: 10px; }
-  .month-grid { gap: 6px; }
-  .month-cell { padding: 6px; }
-}
-
-/* ===== Coupon styles ===== */
 .coupon{
   position: relative;
   display: grid;
@@ -166,51 +164,53 @@ body{margin:0;font-family:Inter,system-ui,Segoe UI,Roboto,Arial,sans-serif;color
     rgba(15,15,30,.55);
   box-shadow: 0 10px 24px rgba(0,0,0,.35);
   backdrop-filter: blur(10px) saturate(150%);
+  overflow:hidden;
 }
 
-/* side notches */
+/* side notches that cut into the card */
 .coupon::before,
 .coupon::after{
   content:"";
   position:absolute;
   width:18px; height:18px;
-  background: #0b0329; /* page bg to "cut out" */
-  border-radius: 50%;
-  top: 50%; transform: translateY(-50%);
+  background:#0b0329; /* page bg to "cut out" */
+  border-radius:50%;
+  top:50%; transform:translateY(-50%);
   box-shadow: inset 0 0 0 1px rgba(255,255,255,.12);
 }
-.coupon::before{ left: -9px; }
-.coupon::after{  right: -9px; }
+.coupon::before{ left:-9px; }
+.coupon::after{  right:-9px; }
 
 /* perforation line */
 .coupon .cut{
-  position:absolute; left: 50%; top: 8px; bottom: 8px;
-  width: 2px; transform: translateX(-50%);
+  position:absolute; left:50%; top:8px; bottom:8px;
+  width:2px; transform:translateX(-50%);
   background: repeating-linear-gradient(
     to bottom,
     rgba(255,255,255,.35), rgba(255,255,255,.35) 6px,
     rgba(255,255,255,0) 6px, rgba(255,255,255,0) 12px
   );
   opacity:.6;
+  z-index:4; /* above sparkles */
 }
 
-/* text area */
-.coupon .title{ font-weight: 900; }
-.coupon .tier{ font-size: 12px; color: var(--white-70); }
+/* Content text */
+.coupon .title{ font-weight:900; }
+.coupon .tier{ font-size:12px; color:var(--white-70); }
 
 /* points badge */
 .badge{
-  align-self: start;
-  padding: 6px 10px;
-  border-radius: 999px;
-  font-weight: 800;
-  background: linear-gradient(90deg,#7c3aed,#a78bfa);
-  box-shadow: 0 8px 18px rgba(124,58,237,.35);
+  align-self:start;
+  padding:6px 10px;
+  border-radius:999px;
+  font-weight:800;
+  background:linear-gradient(90deg,#7c3aed,#a78bfa);
+  box-shadow:0 8px 18px rgba(124,58,237,.35);
 }
 
 /* “held” coupons (in the Coupon Box) */
 .coupon--held{
-  border-style: solid;
+  border-style:solid;
   background:
     radial-gradient(120% 180% at 0% 0%, rgba(183,148,244,.18), rgba(0,0,0,0) 60%),
     rgba(15,15,30,.6);
@@ -218,19 +218,20 @@ body{margin:0;font-family:Inter,system-ui,Segoe UI,Roboto,Arial,sans-serif;color
 
 /* smaller coupon layout on tiny screens */
 @media (max-width: 420px){
-  .coupon{ grid-template-columns: 1fr; }
-  .coupon .cut{ display:none; }
-  .badge{ justify-self: start; }
+  .coupon{ grid-template-columns:1fr; }
+  .badge{ justify-self:start; }
 }
 
-/* ===== Coupon tier looks ===== */
-.coupon .emoji{ font-size: 22px; margin-right: 8px }
+/* Tier looks */
+.coupon .emoji{ font-size:22px; margin-right:8px }
 .coupon .title-row{ display:flex; align-items:center; gap:8px }
 
 .coupon--small{
   border-color: rgba(205,127,50,.55); /* bronze */
+  box-shadow: 0 10px 24px rgba(205,127,50,.18);
   background:
-    radial-gradient(120% 180% at 100% 0%, rgba(205,127,50,.18), rgba(0,0,0,0) 60%),
+    linear-gradient(180deg, rgba(205,127,50,.12), rgba(0,0,0,0) 60%),
+    radial-gradient(120% 180% at 100% 0%, rgba(205,127,50,.22), rgba(0,0,0,0) 60%),
     rgba(15,15,30,.55);
 }
 .coupon--small .badge{
@@ -240,8 +241,10 @@ body{margin:0;font-family:Inter,system-ui,Segoe UI,Roboto,Arial,sans-serif;color
 
 .coupon--medium{
   border-color: rgba(192,192,192,.55); /* silver */
+  box-shadow: 0 10px 24px rgba(192,192,192,.18);
   background:
-    radial-gradient(120% 180% at 100% 0%, rgba(192,192,192,.22), rgba(0,0,0,0) 60%),
+    linear-gradient(180deg, rgba(192,192,192,.12), rgba(0,0,0,0) 60%),
+    radial-gradient(120% 180% at 100% 0%, rgba(192,192,192,.26), rgba(0,0,0,0) 60%),
     rgba(15,15,30,.58);
 }
 .coupon--medium .badge{
@@ -251,8 +254,10 @@ body{margin:0;font-family:Inter,system-ui,Segoe UI,Roboto,Arial,sans-serif;color
 
 .coupon--large{
   border-color: rgba(255,215,0,.55);   /* gold */
+  box-shadow: 0 10px 24px rgba(255,215,0,.20);
   background:
-    radial-gradient(120% 180% at 100% 0%, rgba(255,215,0,.20), rgba(0,0,0,0) 60%),
+    linear-gradient(180deg, rgba(255,215,0,.10), rgba(0,0,0,0) 60%),
+    radial-gradient(120% 180% at 100% 0%, rgba(255,215,0,.24), rgba(0,0,0,0) 60%),
     rgba(15,15,30,.60);
 }
 .coupon--large .badge{
@@ -262,8 +267,10 @@ body{margin:0;font-family:Inter,system-ui,Segoe UI,Roboto,Arial,sans-serif;color
 
 .coupon--special{
   border-color: rgba(229,228,226,.65); /* platinum */
+  box-shadow: 0 12px 26px rgba(229,228,226,.24);
   background:
-    radial-gradient(120% 180% at 100% 0%, rgba(229,228,226,.22), rgba(0,0,0,0) 60%),
+    linear-gradient(180deg, rgba(229,228,226,.12), rgba(0,0,0,0) 60%),
+    radial-gradient(120% 180% at 100% 0%, rgba(229,228,226,.28), rgba(0,0,0,0) 60%),
     rgba(15,15,30,.63);
 }
 .coupon--special .badge{
@@ -271,57 +278,22 @@ body{margin:0;font-family:Inter,system-ui,Segoe UI,Roboto,Arial,sans-serif;color
   box-shadow: 0 8px 18px rgba(229,228,226,.40);
 }
 
-/* stronger, but still classy, tier tints */
-.coupon--small{
-  box-shadow: 0 10px 24px rgba(205,127,50,.18);
-  background:
-    linear-gradient(180deg, rgba(205,127,50,.12), rgba(0,0,0,0) 60%),
-    radial-gradient(120% 180% at 100% 0%, rgba(205,127,50,.22), rgba(0,0,0,0) 60%),
-    rgba(15,15,30,.55);
-}
-
-.coupon--medium{
-  box-shadow: 0 10px 24px rgba(192,192,192,.18);
-  background:
-    linear-gradient(180deg, rgba(192,192,192,.12), rgba(0,0,0,0) 60%),
-    radial-gradient(120% 180% at 100% 0%, rgba(192,192,192,.26), rgba(0,0,0,0) 60%),
-    rgba(15,15,30,.58);
-}
-
-.coupon--large{
-  box-shadow: 0 10px 24px rgba(255,215,0,.20);
-  background:
-    linear-gradient(180deg, rgba(255,215,0,.10), rgba(0,0,0,0) 60%),
-    radial-gradient(120% 180% at 100% 0%, rgba(255,215,0,.24), rgba(0,0,0,0) 60%),
-    rgba(15,15,30,.60);
-}
-
-.coupon--special{
-  box-shadow: 0 12px 26px rgba(229,228,226,.24);
-  background:
-    linear-gradient(180deg, rgba(229,228,226,.12), rgba(0,0,0,0) 60%),
-    radial-gradient(120% 180% at 100% 0%, rgba(229,228,226,.28), rgba(0,0,0,0) 60%),
-    rgba(15,15,30,.63);
-}
-
-
-/* ===== Sparkle Effect (v3, brighter + full coverage) ===== */
-@keyframes sparkleTwinkle {
+/* ===== Sparkle overlay (elements so it won't clash with notches) ===== */
+@keyframes fxTwinkle {
   0%,100% { opacity:.18; transform: translateY(0) }
   50%     { opacity:.38; transform: translateY(-2px) }
 }
-@keyframes sparkleSheen {
+@keyframes fxSheen {
   0%   { transform: translate(-140%, -140%) rotate(18deg); }
   50%  { transform: translate(10%, 10%) rotate(18deg); }
   100% { transform: translate(140%, 140%) rotate(18deg); }
 }
 
-.coupon{ position:relative; overflow:hidden; }
-.coupon > *{ position:relative; z-index:1; }  /* keep content above starfield */
+.coupon > :not(.fx-stars):not(.fx-sheen) { position: relative; z-index: 1; }
+.coupon .cut { z-index: 4; } /* keep perforation line on top */
 
-/* starfield behind content */
-.coupon::before{
-  content:"";
+/* starfield layer */
+.coupon .fx-stars{
   position:absolute; inset:0; z-index:0; pointer-events:none;
   background:
     radial-gradient(2px 2px at 12% 22%, rgba(255,255,255,.55), transparent 60%),
@@ -329,24 +301,25 @@ body{margin:0;font-family:Inter,system-ui,Segoe UI,Roboto,Arial,sans-serif;color
     radial-gradient(1.6px 1.6px at 28% 68%, rgba(255,255,255,.45), transparent 60%),
     radial-gradient(1.6px 1.6px at 62% 48%, rgba(255,255,255,.45), transparent 60%),
     radial-gradient(1.6px 1.6px at 90% 80%, rgba(255,255,255,.45), transparent 60%);
-  animation: sparkleTwinkle 4.2s ease-in-out infinite;
+  animation: fxTwinkle 4.2s ease-in-out infinite;
   mix-blend-mode: screen;
 }
 
-/* sweeping sheen above content */
-.coupon::after{
-  content:"";
-  position:absolute; inset:-45%; z-index:2; pointer-events:none;
+/* sweeping sheen layer */
+.coupon .fx-sheen{
+  position:absolute; z-index:3; pointer-events:none;
+  width: 220%; height: 220%;
+  left:-60%; top:-60%;
   background: linear-gradient(125deg,
     rgba(255,255,255,0) 42%,
     rgba(255,255,255,.55) 50%,
     rgba(255,255,255,0) 58%
   );
-  animation: sparkleSheen 2.8s linear infinite;
-  mix-blend-mode: screen;   /* works great on dark cards */
+  animation: fxSheen 2.8s linear infinite;
+  mix-blend-mode: screen;
 }
 
-/* reduce motion accessibility */
+/* accessibility */
 @media (prefers-reduced-motion: reduce){
-  .coupon::before, .coupon::after { animation: none; }
+  .coupon .fx-stars, .coupon .fx-sheen { animation: none; }
 }
