@@ -1,0 +1,15 @@
+{
+  "short_name": "BTS Tracker",
+  "name": "BTS Baby Tracker",
+  "start_url": ".",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#a78bfa",
+  "icons": [
+    {
+      "src": "Serena.png",
+      "type": "image/png",
+      "sizes": "512x512"
+    }
+  ]
+}
