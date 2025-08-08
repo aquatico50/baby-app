@@ -12,11 +12,32 @@ const CATEGORIES = [
   { key: "doctor", label: "Doctor", points: 20 },
   { key: "other", label: "Other", points: 3 },
 ];
+
+/* New rewards list */
 const REWARDS = [
-  { key: "massage", label: "Massage", cost: 400 },
-  { key: "date", label: "Date Night", cost: 300 },
-  { key: "coffee", label: "Starbucks $10", cost: 150 },
-  { key: "clothes", label: "Clothing Gift Card $25", cost: 500 },
+  // Small (10–50)
+  { key: "foot",     label: "Foot massage",                         cost: 10,  tier: "Small" },
+  { key: "back",     label: "Back rub",                              cost: 15,  tier: "Small" },
+  { key: "diapers3", label: "I change the next 3 diapers",           cost: 20,  tier: "Small" },
+  { key: "shower",   label: "Uninterrupted shower time",             cost: 25,  tier: "Small" },
+  { key: "bedtime",  label: "I do the bedtime routine",              cost: 30,  tier: "Small" },
+  { key: "snack",    label: "Favorite snack/dessert run",            cost: 50,  tier: "Small" },
+
+  // Medium (75–150)
+  { key: "morning",  label: "I handle all baby duties (morning)",    cost: 75,  tier: "Medium" },
+  { key: "spa",      label: "Full at-home spa setup",                cost: 100, tier: "Medium" },
+  { key: "breakfast",label: "Breakfast in bed",                      cost: 100, tier: "Medium" },
+  { key: "housework",label: "I handle ALL housework for a day",      cost: 150, tier: "Medium" },
+
+  // Large (200–400)
+  { key: "date",     label: "Planned at-home date night",            cost: 200, tier: "Large" },
+  { key: "movie",    label: "Her choice: movie & snacks night",      cost: 200, tier: "Large" },
+  { key: "daytrip",  label: "Day trip to a favorite place",          cost: 300, tier: "Large" },
+  { key: "nochores", label: "No chores, no baby duty day",           cost: 400, tier: "Large" },
+
+  // Special (500+)
+  { key: "weekend",  label: "Weekend getaway",                       cost: 500, tier: "Special" },
+  { key: "dreamday", label: "Her dream day (you plan everything)",   cost: 600, tier: "Special" },
 ];
 
 /* -------- HELPERS -------- */
@@ -45,15 +66,7 @@ function composeISO(dateStr, timeStr) {
 const dateKeyFromISO = (iso) => (iso || "").slice(0, 10);
 
 /* tiny confetti */
-const COLORS = [
-  "#f87171",
-  "#fbbf24",
-  "#34d399",
-  "#60a5fa",
-  "#a78bfa",
-  "#f472b6",
-  "#f59e0b",
-];
+const COLORS = ["#f87171", "#fbbf24", "#34d399", "#60a5fa", "#a78bfa", "#f472b6", "#f59e0b"];
 const makeConfetti = (n = 18) =>
   Array.from({ length: n }).map((_, i) => ({
     id: `${Date.now()}-${i}`,
@@ -72,11 +85,14 @@ export default function TaskTracker() {
   const [menuOpen, setMenuOpen] = useState(false);
   useEffect(() => save("tab", tab), [tab]);
 
-  /* points + rewards (points shown in header) */
+  /* points + rewards */
   const [points, setPoints] = useState(() => load("points", 0));
   const [redemptions, setRedemptions] = useState(() => load("redemptions", []));
+  const [coupons, setCoupons] = useState(() => load("coupons", [])); // earned, un-used
+  const [showCoupons, setShowCoupons] = useState(false);
   useEffect(() => save("points", points), [points]);
   useEffect(() => save("redemptions", redemptions), [redemptions]);
+  useEffect(() => save("coupons", coupons), [coupons]);
 
   /* schedule events (these are your tasks) */
   // {id,title,whenISO,category,done}
@@ -248,25 +264,32 @@ export default function TaskTracker() {
     );
 
   /* rewards */
-  const canRedeem = (c) => points >= c;
-  const redeem = (r) => {
-    if (!canRedeem(r.cost)) return;
+  function redeem(r) {
+    if (points < r.cost) return;
     setPoints((p) => p - r.cost);
-    setRedemptions((prev) => [
-      ...prev,
-      {
-        id: uid(),
-        reward: r.key,
-        label: r.label,
-        cost: r.cost,
-        date: new Date().toISOString(),
-      },
-    ]);
+
+    const coupon = {
+      id: uid(),
+      reward: r.key,
+      label: r.label,
+      cost: r.cost,
+      date: new Date().toISOString(),
+    };
+
+    setCoupons((prev) => [...prev, coupon]); // add to coupon box
+    setRedemptions((prev) => [...prev, { ...coupon }]); // keep history
+
     setConfetti(makeConfetti(24));
     setTimeout(() => setConfetti([]), 1400);
-    setToast({ msg: `Redeemed: ${r.label} (−${r.cost} pts)`, when: Date.now() });
+    setToast({ msg: `Coupon added: ${r.label} (−${r.cost} pts)`, when: Date.now() });
     setTimeout(() => setToast(null), 1700);
-  };
+  }
+
+  function useCoupon(id) {
+    setCoupons((prev) => prev.filter((c) => c.id !== id));
+    setToast({ msg: "Coupon used 🎉", when: Date.now() });
+    setTimeout(() => setToast(null), 1200);
+  }
 
   const TABS = [
     { key: "schedule", label: "Schedule" },
@@ -319,124 +342,117 @@ export default function TaskTracker() {
       {/* -------- SCHEDULE (DEFAULT) -------- */}
       {tab === "schedule" && (
         <section className="card" style={{ display: "grid", gap: 12 }}>
-{/* Date bar with arrows */}
-<div className="card" style={{display:"flex", gap:8, alignItems:"center", justifyContent:"space-between", flexWrap:"wrap"}}>
-  <div style={{display:"flex", gap:8, alignItems:"center"}}>
-    <button
-      className="menu-item"
-      onClick={()=>{
-        const d = new Date(dayDate);
-        d.setDate(d.getDate() - 1);
-        setDayDate(d.toISOString().slice(0,10));
-      }}
-      aria-label="Previous day"
-    >◀</button>
+          {/* Date bar with arrows */}
+          <div className="card" style={{display:"flex", gap:8, alignItems:"center", justifyContent:"space-between", flexWrap:"wrap"}}>
+            <div style={{display:"flex", gap:8, alignItems:"center"}}>
+              <button
+                className="menu-item"
+                onClick={()=>{
+                  const d = new Date(dayDate);
+                  d.setDate(d.getDate() - 1);
+                  setDayDate(d.toISOString().slice(0,10));
+                }}
+                aria-label="Previous day"
+              >◀</button>
 
-    <input
-      type="date"
-      className="input"
-      value={dayDate}
-      onChange={(e)=>setDayDate(e.target.value)}
-      style={{width:150}}
-    />
+              <input
+                type="date"
+                className="input"
+                value={dayDate}
+                onChange={(e)=>setDayDate(e.target.value)}
+                style={{width:150}}
+              />
 
-    <button
-      className="menu-item"
-      onClick={()=>{
-        const d = new Date(dayDate);
-        d.setDate(d.getDate() + 1);
-        setDayDate(d.toISOString().slice(0,10));
-      }}
-      aria-label="Next day"
-    >▶</button>
-  </div>
+              <button
+                className="menu-item"
+                onClick={()=>{
+                  const d = new Date(dayDate);
+                  d.setDate(d.getDate() + 1);
+                  setDayDate(d.toISOString().slice(0,10));
+                }}
+                aria-label="Next day"
+              >▶</button>
+            </div>
 
-  {/* quick 'Today' button if you want */}
-  <button className="menu-item" onClick={()=>setDayDate(new Date().toISOString().slice(0,10))}>
-    Today
-  </button>
-</div>
-          {/* Collapsed Add Item */}
-          <div>
-            {!showAdd ? (
-              <button className="btn" onClick={() => setShowAdd(true)}>
-                Add Item
-              </button>
-            ) : (
-              <div className="card" style={{ display: "grid", gap: 10 }}>
-
-                <div style={{ display: "grid", gap: 8 }}>
-                  <label className="task-meta">Items</label>
-                  <select
-                    className="select"
-                    value={addCat}
-                    onChange={(e) => setAddCat(e.target.value)}
-                  >
-                    <option value="" disabled>
-                      Items
-                    </option>
-                    {CATEGORIES.map((c) => (
-                      <option key={c.key} value={c.key}>
-                        {c.label}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-
-                <div style={{ display: "grid", gap: 8 }}>
-                  <label className="task-meta">Time</label>
-                  <input
-                    type="time"
-                    className="input"
-                    value={addTime}
-                    onChange={(e) => setAddTime(e.target.value)}
-                  />
-                </div>
-
-                <div style={{ display: "grid", gap: 8 }}>
-                  <label className="task-meta">Title</label>
-                  <input
-                    className="input"
-                    placeholder="Add item (e.g., 6oz bottle, bath…)"
-                    value={addTitle}
-                    onChange={(e) => setAddTitle(e.target.value)}
-                  />
-                </div>
-
-                <div style={{ display: "flex", gap: 8, justifyContent: "flex-end" }}>
-                  <button
-                    className="menu-btn"
-                    onClick={() => {
-                      setShowAdd(false);
-                      setAddCat("");
-                      setAddTime("");
-                      setAddTitle("");
-                    }}
-                  >
-                    Cancel
-                  </button>
-
-                  <button
-                    className="btn"
-                    onClick={() => {
-                      const cat = addCat || "other";
-                      const time = addTime || "08:00";
-                      const title = addTitle || "";
-                      addEvent({ title, timeHHMM: time, category: cat });
-                      setShowAdd(false);
-                      setAddCat("");
-                      setAddTime("");
-                      setAddTitle("");
-                    }}
-                  >
-                    Save
-                  </button>
-                </div>
-              </div>
-            )}
+            <button className="menu-btn" onClick={()=>setShowAdd(v=>!v)}>
+              {showAdd ? "Close" : "Add Item"}
+            </button>
           </div>
 
-          {/* 24-hour grid with borders + fixed times */}
+          {/* Collapsed Add Item panel */}
+          {showAdd && (
+            <div className="card" style={{ display: "grid", gap: 10 }}>
+              <div style={{ display: "grid", gap: 8 }}>
+                <label className="task-meta">Items</label>
+                <select
+                  className="select"
+                  value={addCat}
+                  onChange={(e) => setAddCat(e.target.value)}
+                >
+                  <option value="" disabled>
+                    Items
+                  </option>
+                  {CATEGORIES.map((c) => (
+                    <option key={c.key} value={c.key}>
+                      {c.label}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              <div style={{ display: "grid", gap: 8 }}>
+                <label className="task-meta">Time</label>
+                <input
+                  type="time"
+                  className="input"
+                  value={addTime}
+                  onChange={(e) => setAddTime(e.target.value)}
+                />
+              </div>
+
+              <div style={{ display: "grid", gap: 8 }}>
+                <label className="task-meta">Title</label>
+                <input
+                  className="input"
+                  placeholder="Add item (e.g., 6oz bottle, bath…)"
+                  value={addTitle}
+                  onChange={(e) => setAddTitle(e.target.value)}
+                />
+              </div>
+
+              <div style={{ display: "flex", gap: 8, justifyContent: "flex-end" }}>
+                <button
+                  className="menu-btn"
+                  onClick={() => {
+                    setShowAdd(false);
+                    setAddCat("");
+                    setAddTime("");
+                    setAddTitle("");
+                  }}
+                >
+                  Cancel
+                </button>
+
+                <button
+                  className="btn"
+                  onClick={() => {
+                    const cat = addCat || "other";
+                    const time = addTime || "08:00";
+                    const title = addTitle || "";
+                    addEvent({ title, timeHHMM: time, category: cat });
+                    setShowAdd(false);
+                    setAddCat("");
+                    setAddTime("");
+                    setAddTitle("");
+                  }}
+                >
+                  Save
+                </button>
+              </div>
+            </div>
+          )}
+
+          {/* 24-hour grid */}
           <div className="day-grid">
             {hours.map((h) => {
               const hh = String(h).padStart(2, "0");
@@ -716,28 +732,67 @@ export default function TaskTracker() {
         </section>
       )}
 
-      {/* -------- REWARDS -------- */}
+      {/* -------- REWARDS (with Coupon Box) -------- */}
       {tab === "rewards" && (
-        <section className="card" style={{ display: "grid", gap: 10 }}>
-          <div className="task-meta">
-            Your points: <strong>{points}</strong>
+        <section className="card" style={{ display: "grid", gap: 12 }}>
+          <div style={{display:"flex", justifyContent:"space-between", alignItems:"center", flexWrap:"wrap", gap:8}}>
+            <div className="task-meta">Your points: <strong>{points}</strong></div>
+            <button className="menu-btn" onClick={()=>setShowCoupons(v=>!v)}>
+              {showCoupons ? "← Back to Rewards" : "🎟 Open Coupon Box"}
+            </button>
           </div>
-          {REWARDS.map((r) => (
-            <div key={r.key} className="task">
-              <div>
-                <div style={{ fontWeight: 800 }}>{r.label}</div>
-                <div className="task-meta">{r.cost} pts</div>
-              </div>
-              <button
-                className="btn"
-                disabled={points < r.cost}
-                onClick={() => redeem(r)}
-                style={{ opacity: points < r.cost ? 0.5 : 1 }}
-              >
-                Redeem
-              </button>
+
+          {/* Coupon Box */}
+          {showCoupons ? (
+            <div className="card" style={{ display: "grid", gap: 10 }}>
+              <div style={{fontWeight:900, marginBottom:4}}>Your Coupons</div>
+              {coupons.length === 0 ? (
+                <div className="task-meta">No coupons yet. Redeem a reward to add one here.</div>
+              ) : (
+                <ul style={{ listStyle:"none", padding:0, margin:0, display: "grid", gap: 8 }}>
+                  {coupons.slice().reverse().map(c => (
+                    <li key={c.id} className="task">
+                      <div>
+                        <div style={{fontWeight:800}}>{c.label}</div>
+                        <div className="task-meta">
+                          Earned {new Date(c.date).toLocaleString()} · {c.cost} pts
+                        </div>
+                      </div>
+                      <button className="btn" onClick={()=>useCoupon(c.id)}>Use</button>
+                    </li>
+                  ))}
+                </ul>
+              )}
             </div>
-          ))}
+          ) : (
+            /* Rewards List (grouped) */
+            <div className="card" style={{ display: "grid", gap: 14 }}>
+              {["Small","Medium","Large","Special"].map(tier => {
+                const list = REWARDS.filter(r => r.tier === tier);
+                return (
+                  <div key={tier} className="card" style={{ display:"grid", gap:10 }}>
+                    <div style={{fontWeight:900}}>{tier} Rewards</div>
+                    {list.map(r => (
+                      <div key={r.key} className="task">
+                        <div>
+                          <div style={{fontWeight:800}}>{r.label}</div>
+                          <div className="task-meta">{r.cost} pts</div>
+                        </div>
+                        <button
+                          className="btn"
+                          disabled={points < r.cost}
+                          onClick={()=>redeem(r)}
+                          style={{opacity: points < r.cost ? .5 : 1}}
+                        >
+                          Redeem
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                );
+              })}
+            </div>
+          )}
         </section>
       )}
 
