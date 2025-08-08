@@ -34,7 +34,7 @@ const TaskTracker = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-purple-200 to-indigo-100 text-gray-900 p-4">
-      <h1 className="text-2xl font-bold text-purple-700 mb-4">BTS Baby Tracker</h1>
+      <h1 className="text-2xl font-bold text-purple-700 mb-4">Serena's Schedule</h1>
 
       <div className="flex gap-2 mb-4">
         <input
