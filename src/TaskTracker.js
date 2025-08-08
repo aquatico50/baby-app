@@ -364,16 +364,6 @@ export default function TaskTracker() {
               </button>
             ) : (
               <div className="card" style={{ display: "grid", gap: 10 }}>
-                <div style={{ display: "grid", gap: 8 }}>
-                  <label className="task-meta">Date</label>
-                  <input
-                    type="date"
-                    className="input"
-                    value={dayDate}
-                    onChange={(e) => setDayDate(e.target.value)}
-                    style={{ width: "100%" }}
-                  />
-                </div>
 
                 <div style={{ display: "grid", gap: 8 }}>
                   <label className="task-meta">Items</label>
